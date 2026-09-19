@@ -1,94 +1,58 @@
-<!-- add-book.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Book</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-          crossorigin="anonymous">
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <meta name="description" content="Add a book to your personal library.">
+    <title>BookShelf — Add a Book</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-    <div class="container form-container">
-        <h2 class="mb-4">Add Book</h2>
-        <form id="addBookForm" th:action="@{/books/add}" th:object="${book}" method="post">
-            <div class="form-group">
-                <label for="name">Name</label>
-                <input type="text" class="form-control" id="name" th:field="*{name}" required>
-            </div>
-            <div class="form-group">
-                <label for="description">Description</label>
-                <input type="text" class="form-control" id="description" th:field="*{description}" required>
-            </div>
-            <div class="form-group">
-                <label for="imageUrl">Image URL</label>
-                <input type="text" class="form-control" id="imageUrl" th:field="*{imageName}" oninput="updateImagePreview()">
-            </div>
-            <div class="form-group">
-                <label for="imagePreview">Image Preview</label>
-                <img id="imagePreview" class="img-fluid rounded" alt="Image Preview">
-            </div>
-            <div class="form-group">
-                <label for="videoUrl">Video URL</label>
-                <input type="text" class="form-control" id="videoUrl" th:field="*{videoUrl}" oninput="updateVideoPreview()">
-            </div>
-            <div class="form-group">
-                <label for="videoPreview">Video Preview</label>
-                <video id="videoPreview" controls class="img-fluid rounded">
-                    Your browser does not support the video tag.
-                </video>
-            </div>
-            <button type="submit" class="btn btn-primary" onclick="addBook()">Submit</button>
-        </form>
-
-        <div id="bookDetailsContainer" class="mt-4">
-            <!-- Newly added book details will be displayed here -->
+<main class="page-shell">
+    <header class="site-header">
+        <a class="brand" th:href="@{/books}" aria-label="BookShelf home">
+            <span class="brand-mark" aria-hidden="true">B</span>
+            <span><strong class="brand-title">BookShelf</strong><small class="brand-subtitle">Your reading, beautifully organized.</small></span>
+        </a>
+        <a class="button secondary" th:href="@{/books}">Back to shelf</a>
+    </header>
+    <section class="form-wrap">
+        <div class="form-card">
+            <p class="eyebrow">New collection</p>
+            <h1>Add a book</h1>
+            <p class="form-intro">Capture the details now, and keep the story easy to revisit later.</p>
+            <form class="book-form" data-book-form th:action="@{/books/add}" th:object="${book}" method="post" novalidate>
+                <div class="field-group" th:classappend="${#fields.hasErrors('name')} ? 'has-error' : ''">
+                    <label for="name">Book name <span aria-hidden="true">*</span></label>
+                    <input id="name" type="text" th:field="*{name}" required maxlength="120" autocomplete="off" placeholder="e.g. The Midnight Library" th:aria-invalid="${#fields.hasErrors('name')}">
+                    <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+                </div>
+                <div class="field-group" th:classappend="${#fields.hasErrors('description')} ? 'has-error' : ''">
+                    <label for="description">Description <span aria-hidden="true">*</span></label>
+                    <textarea id="description" th:field="*{description}" required maxlength="1000" placeholder="What makes this book worth remembering?"></textarea>
+                    <p class="field-help">Keep it under 1000 characters.</p>
+                    <p class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></p>
+                </div>
+                <div class="field-group" th:classappend="${#fields.hasErrors('imageName')} ? 'has-error' : ''">
+                    <label for="imageName">Cover image URL <span class="field-help">(optional)</span></label>
+                    <input id="imageName" type="url" th:field="*{imageName}" maxlength="500" placeholder="https://example.com/cover.jpg" th:aria-invalid="${#fields.hasErrors('imageName')}">
+                    <p class="field-error" th:if="${#fields.hasErrors('imageName')}" th:errors="*{imageName}"></p>
+                    <div class="preview" id="imagePreviewWrap" hidden><span class="preview-label">Image preview</span><img id="imagePreview" alt="Cover preview"></div>
+                </div>
+                <div class="field-group" th:classappend="${#fields.hasErrors('videoUrl')} ? 'has-error' : ''">
+                    <label for="videoUrl">Video URL <span class="field-help">(optional)</span></label>
+                    <input id="videoUrl" type="url" th:field="*{videoUrl}" maxlength="500" placeholder="https://example.com/trailer.mp4" th:aria-invalid="${#fields.hasErrors('videoUrl')}">
+                    <p class="field-error" th:if="${#fields.hasErrors('videoUrl')}" th:errors="*{videoUrl}"></p>
+                    <div class="preview" id="videoPreviewWrap" hidden><span class="preview-label">Video preview</span><video id="videoPreview" controls></video></div>
+                </div>
+                <div class="form-actions">
+                    <a class="button secondary" th:href="@{/books}">Cancel</a>
+                    <button class="button" type="submit">Save book</button>
+                </div>
+            </form>
         </div>
-
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-                integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-                crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-                integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-                crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-                integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-                crossorigin="anonymous"></script>
-        <script src="/static/js/script.js"></script>
-        <script>
-            function addBook() {
-                // Make an AJAX request to add the book
-                $.ajax({
-                    type: 'POST',
-                    url: '/books/add',
-                    data: $('#addBookForm').serialize(),
-                    success: function (response) {
-                        // Update the page with the newly added book details
-                        $('#bookDetailsContainer').append(response);
-                        // Clear form fields after adding a book
-                        $('#addBookForm')[0].reset();
-                        // Reset image and video previews
-                        $('#imagePreview').attr('src', '');
-                        $('#videoPreview').attr('src', '');
-                    },
-                    error: function (error) {
-                        console.error('Error adding book:', error);
-                    }
-                });
-            }
-
-            function updateImagePreview() {
-                var imageUrl = document.getElementById("imageUrl").value;
-                document.getElementById("imagePreview").src = imageUrl;
-            }
-
-            function updateVideoPreview() {
-                var videoUrl = document.getElementById("videoUrl").value;
-                document.getElementById("videoPreview").src = videoUrl;
-            }
-        </script>
-    </div>
+    </section>
+</main>
+<script th:src="@{/js/script.js}"></script>
 </body>
 </html>
